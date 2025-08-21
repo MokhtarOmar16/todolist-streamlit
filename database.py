@@ -1,13 +1,28 @@
-import streamlit as st
+from typing import List
+from typing import Optional
+from sqlalchemy import ForeignKey
+from sqlalchemy import String,create_engine
+from sqlalchemy.orm import DeclarativeBase, sessionmaker, Session
+from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import mapped_column
+from sqlalchemy.orm import relationship
 
-st.title("تجربة مع الاكستنشن")
+db_url = "sqlite:///./app.db"
+engine = create_engine(db_url, echo=True)
 
-with st.form("my_form"):
-    name = st.text_input("اسمك")
-    age = st.number_input("عمرك", min_value=0, max_value=120, step=1)
-    feedback = st.text_area("رأيك")
+class Base(DeclarativeBase):
+    pass
 
-    submitted = st.form_submit_button("إرسال")
-    if submitted:
-        st.write("📌 القيم اللي اتملاّت:")
-        st.write({"name": name, "age": age, "feedback": feedback})
+class Task(Base):
+    id: Mapped[int] = mapped_column(primary_key=True)
+    title: Mapped[str] = mapped_column(String(50))
+    description: Mapped[Optional[str]]
+
+    __tablename__ = "tasks"
+
+
+MySession = sessionmaker(bind=engine)
+
+
+def get_session() -> Session:
+    return MySession()
